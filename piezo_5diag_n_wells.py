@@ -36,6 +36,7 @@ Courant_number_water = (delta_t/k_water/delta_fi**2 + delta_t/k_water/delta_r**2
 
 wells_coord = [(round(0.1392/delta_r), round(1.1489/delta_fi)), (round(0.1392/delta_r), round((np.pi+1.1489)/delta_fi))]
 P_well = [1450000, 100000]
+print(wells_coord)
 
 CP_dict = {}  # словарь, в котором ключами являются координаты точек с давлениями, а значения - значения этих давлений
 
@@ -143,6 +144,7 @@ if __name__ == '__main__':
     # P_all_center = np.ones((1, M_fi)) * P_center
     # Pres_distrib = np.vstack((P_all_center, Pres_distrib))
     plt.show()
+    print(PinPoint)
     fig2 = plt.figure()
     plt.plot(PinPoint)
     plt.show()

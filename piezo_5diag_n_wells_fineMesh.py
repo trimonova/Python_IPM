@@ -61,7 +61,7 @@ Pres_distrib = np.ones((N_r_full, M_fi_full)) * Pres
 c3_oil = k_oil/delta_t
 c3_water = k_water/delta_t
 #c4 = 1/delta_fi**2
-T_exp = 60
+T_exp = 10
 Courant_number_oil = (delta_t/k_oil/delta_fi**2 + delta_t/k_oil/delta_r**2)/100
 Courant_number_water = (delta_t/k_water/delta_fi**2 + delta_t/k_water/delta_r**2)/100
 wells_coord_real = [(0.1392, 1.1489), (0.1392, np.pi+1.1489)]
@@ -74,9 +74,10 @@ for well_coord in wells_coord_real:
             break
 wells_dists = []
 for well_coord in wells_coord_real:
-    wells_dists.append(N_r_fine + int((well_coord[0]-r_well-R_for_fine)/delta_r))
+    wells_dists.append(N_r_fine + int((well_coord[0]-r_well-R_for_fine)/delta_r)+2)
 
 wells_coord = list(zip( wells_dists, wells_angles))
+print(well_coord)
 
 print(wells_coord)
 P_well = [1450000, 100000]
@@ -203,6 +204,7 @@ if __name__ == '__main__':
     # P_all_center = np.ones((1, M_fi_full)) * P_center
     # Pres_distrib = np.vstack((P_all_center, Pres_distrib))
     plt.show()
+    print(PinPoint)
     fig2 = plt.figure()
     plt.plot(PinPoint)
     plt.show()
