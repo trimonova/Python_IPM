@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 
 perm = 2 * 10 ** (-15)  # м2 проницаемость
-mu_water = 2 * 10 ** (-3)  # Па*с вязкость
-mu_oil = 2*10**(-3)
-fi = 0.2  # пористость
+mu_water = 1 * 10 ** (-3)  # Па*с вязкость
+mu_oil = 1*10**(-3)
+fi = 0.19  # пористость
 Cf = 10 ** (-9)  # сжимаемость флюида
 Cr = 5 * 10 ** (-10)  # сжимаемость скелета
 k_water = mu_water*fi*(Cf+Cr)/perm
@@ -30,12 +30,13 @@ c2 = 1/2/delta_r
 c3_oil = k_oil/delta_t
 c3_water = k_water/delta_t
 c4 = 1/delta_fi**2
-T_exp = 10
+T_exp = 1
 Courant_number_oil = (delta_t/k_oil/delta_fi**2 + delta_t/k_oil/delta_r**2)/100
 Courant_number_water = (delta_t/k_water/delta_fi**2 + delta_t/k_water/delta_r**2)/100
 
 wells_coord = [(round(0.1392/delta_r), round(1.1489/delta_fi)), (round(0.1392/delta_r), round((np.pi+1.1489)/delta_fi))]
-P_well = [1450000, 100000]
+P_well = ['neuman', 100000]
+BC_type = ['neuman', 'dirichlet']
 print(wells_coord)
 
 CP_dict = {}  # словарь, в котором ключами являются координаты точек с давлениями, а значения - значения этих давлений
@@ -104,10 +105,16 @@ def PorePressure_in_Time(N_r, M_fi, Pres_distrib, c1, c2, c3_water, c4, wells_co
     wells_coord.sort(key=sortByAngle)
     wells_coord_reverse = wells_coord[:: -1]
     for well_coord_couple in wells_coord_reverse:
-        A_well_column = A_full[:][(well_coord_couple[1]-1)*N_r + well_coord_couple[0]]
-        for cell_number in range(len(A_well_column)):
-            if A_well_column[cell_number] != 0:
-                B[cell_number] = B[cell_number] - A_well_column[cell_number]*CP_dict[well_coord_couple]
+        A_well_column = A_full[:][(well_coord_couple[1] - 1) * N_r + well_coord_couple[0]]
+        if CP_dict[well_coord_couple] != 'neuman':
+            for cell_number in range(len(A_well_column)):
+                if A_well_column[cell_number] != 0:
+                    B[cell_number] = B[cell_number] - A_well_column[cell_number]*CP_dict[well_coord_couple]
+        else:
+            for cell_number in range(len(A_well_column)):
+                if A_well_column[cell_number] != 0:
+                    A_full[cell_number][cell_number] = A_full[cell_number][cell_number] + A_well_column[cell_number]
+
         A_full = np.delete(A_full, (well_coord_couple[1]-1)*N_r + well_coord_couple[0], axis=0)
         A_full = np.delete(A_full,
                            (well_coord_couple[1] - 1) * N_r + well_coord_couple[0],axis=1)
@@ -116,7 +123,11 @@ def PorePressure_in_Time(N_r, M_fi, Pres_distrib, c1, c2, c3_water, c4, wells_co
     #print(np.shape(A_full), np.shape(B))
     P_new = np.linalg.solve(A_full, B)
     for well_coord_couple in wells_coord_reverse:
-        P_new = np.insert(P_new, (well_coord_couple[1]-1)*N_r + well_coord_couple[0], CP_dict[well_coord_couple])
+        if CP_dict[well_coord_couple] != 'neuman':
+            P_new = np.insert(P_new, (well_coord_couple[1]-1)*N_r + well_coord_couple[0], CP_dict[well_coord_couple])
+        else:
+            P_new = np.insert(P_new, (well_coord_couple[1] - 1) * N_r + well_coord_couple[0],
+                              100000)
     #print(N_r, M_fi, N_r_oil, np.shape(P_new))
     P_new = P_new.reshape(N_r*M_fi, 1)
     Pres_end = np.zeros((N_r, M_fi))
